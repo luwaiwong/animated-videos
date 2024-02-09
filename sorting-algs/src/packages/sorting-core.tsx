@@ -18,6 +18,9 @@ export type sortSettings = {
     rectStrokeWidth: number,
     rectMargin: number,
     rectRadius: number,
+    swapTime: number,
+    checkTime: number,
+    paddingTime: number,
 };
 export let defaultSettings: sortSettings = {
     font: "Martian Mono",
@@ -31,6 +34,9 @@ export let defaultSettings: sortSettings = {
     rectStrokeWidth: 1,
     rectMargin: 50,
     rectRadius: 1,
+    swapTime: 1,
+    checkTime: 1,
+    paddingTime: 1,
 };
 
 function calculateListX(index:number, s: sortSettings) {
@@ -74,32 +80,37 @@ export function createItem(refs: Rect[], value: number, i: number, s: sortSettin
 }
 
 export function* swapItems(refs: Rect[], i: number, j: number, s: sortSettings) {
+    yield* checkItems(refs, [i,j], s);
     let temp = refs[i];
-    yield refs[i].position.x(refs[j].position.x(),1);
-    yield refs[j].position.x(temp.position.x(),1);
-    yield* waitFor(1);
+    yield refs[i].position.x(refs[j].position.x(),s.swapTime);
+    yield refs[j].position.x(temp.position.x(),s.swapTime);
+    yield* waitFor(s.paddingTime);
+    yield* uncheckItems(refs, [i,j], s);
 }
 
 export function* checkItems(refs: Rect[], items: number[], s: sortSettings) {
     // Flash both items the check color
     for (let i of items){
-        yield refs[i].stroke(colors.CHECK, 1)
+        yield refs[i].stroke(colors.CHECK, s.checkTime)
     }
-    yield* waitFor(1);
+    yield* waitFor(s.paddingTime);
     
 }
 
 export function* uncheckItems(refs: Rect[], items: number[], s: sortSettings) {
     // Flash both items the check color
     for (let i of items){
-        yield refs[i].stroke(colors.FOREGROUND, 1)
+        yield refs[i].stroke(colors.FOREGROUND, s.checkTime)
     }
-    yield* waitFor(1);
+    yield* waitFor(s.paddingTime);
     
 }
 
 
-export function* finishSort(refs: Rect[], i: number, x: number, s: sortSettings) {
+export function* finishSort(refs: Rect[],  s: sortSettings) {
     // makes everything green
+    for (let i of refs){
+        yield i.stroke(colors.SUCCESS, s.checkTime)
+    }
 }
 
