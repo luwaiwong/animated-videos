@@ -21,6 +21,7 @@ export type sortSettings = {
     swapTime: number,
     checkTime: number,
     paddingTime: number,
+    finishTime: number
 };
 export let defaultSettings: sortSettings = {
     font: "Martian Mono",
@@ -37,6 +38,7 @@ export let defaultSettings: sortSettings = {
     swapTime: 1,
     checkTime: 1,
     paddingTime: 1,
+    finishTime: 0.1,
 };
 
 function calculateListX(index:number, s: sortSettings) {
@@ -84,6 +86,10 @@ export function* swapItems(refs: Rect[], i: number, j: number, s: sortSettings) 
     let temp = refs[i];
     yield refs[i].position.x(refs[j].position.x(),s.swapTime);
     yield refs[j].position.x(temp.position.x(),s.swapTime);
+
+    // Swap items in list
+    refs[i] = refs[j]
+    refs[j] = temp
     yield* waitFor(s.paddingTime);
     yield* uncheckItems(refs, [i,j], s);
 }
@@ -110,7 +116,7 @@ export function* uncheckItems(refs: Rect[], items: number[], s: sortSettings) {
 export function* finishSort(refs: Rect[],  s: sortSettings) {
     // makes everything green
     for (let i of refs){
-        yield i.stroke(colors.SUCCESS, s.checkTime)
+        yield* i.stroke(colors.SUCCESS, s.finishTime)
     }
 }
 
